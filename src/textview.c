@@ -1621,7 +1621,7 @@ static void textview_write_line(TextView *textview, const gchar *str,
 			else if (buf[0] == '-')
 				fg_color = "diff-del";
 			else if (strncmp(buf, "@@ ", 3) == 0 &&
-					strcmp(buf+strlen(buf)-4, " @@\n") == 0)
+				 strstr(&buf[3], " @@"))
 				fg_color = "diff-hunk";
 		} else if (strcmp(buf,"-- \n") == 0
 				|| strcmp(buf, "- -- \n") == 0
