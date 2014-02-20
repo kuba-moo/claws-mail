@@ -93,6 +93,7 @@ struct _PrefsAccount
 	gint msg_leave_time;
 	gint msg_leave_hour;
 	gboolean recv_at_getall;
+	gboolean recv_at_autochk;
 	gboolean sd_rmmail_on_download;
 	gboolean enable_size_limit;
 	gint size_limit;
