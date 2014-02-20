@@ -132,11 +132,11 @@ static gint get_spool			(FolderItem	*dest,
 					 PrefsAccount	*account);
 
 static gint inc_spool_account(PrefsAccount *account);
-static gint inc_all_spool(void);
+static gint inc_all_spool(gboolean autocheck);
 static void inc_autocheck_timer_set_interval	(guint		 interval);
 static gint inc_autocheck_func			(gpointer	 data);
 
-static void inc_notify_cmd		(gint new_msgs, 
+static void inc_notify_cmd		(gint new_msgs,
  					 gboolean notify);
 
 static void inc_update_stats(gint new_msgs)
@@ -309,6 +309,14 @@ gint inc_account_mail(MainWindow *mainwin, PrefsAccount *account)
 	return new_msgs;
 }
 
+gboolean should_check(PrefsAccount *ac_prefs, gboolean autocheck)
+{
+	if (autocheck)
+		return ac_prefs->recv_at_autochk;
+	else
+		return ac_prefs->recv_at_getall;
+}
+
 void inc_all_account_mail(MainWindow *mainwin, gboolean autocheck,
 			  gboolean notify)
 {
@@ -350,7 +358,7 @@ void inc_all_account_mail(MainWindow *mainwin, gboolean autocheck,
 	}
 	
 	/* check local folders */
-	account_new_msgs = inc_all_spool();
+	account_new_msgs = inc_all_spool(autocheck);
 	if (account_new_msgs > 0)
 		new_msgs += account_new_msgs;
 
@@ -358,7 +366,7 @@ void inc_all_account_mail(MainWindow *mainwin, gboolean autocheck,
 	for (list = account_get_list(); list != NULL; list = list->next) {
 		PrefsAccount *account = list->data;
 		if ((account->protocol == A_IMAP4 ||
-		     account->protocol == A_NNTP) && account->recv_at_getall) {
+		     account->protocol == A_NNTP) && should_check(account, autocheck)) {
 			new_msgs += folderview_check_new(FOLDER(account->folder));
 		}
 	}
@@ -368,7 +376,7 @@ void inc_all_account_mail(MainWindow *mainwin, gboolean autocheck,
 		IncSession *session;
 		PrefsAccount *account = list->data;
 
-		if (account->recv_at_getall) {
+		if (should_check(account, autocheck)) {
 			if (!(account->receive_in_progress)) {
 				session = inc_session_new(account);
 				if (session)
@@ -1338,7 +1346,7 @@ static gint inc_spool_account(PrefsAccount *account)
 	return result;
 }
 
-static gint inc_all_spool(void)
+static gint inc_all_spool(gboolean autocheck)
 {
 	GList *list = NULL;
 	gint new_msgs = 0;
@@ -1351,7 +1359,7 @@ static gint inc_all_spool(void)
 		PrefsAccount *account = list->data;
 
 		if ((account->protocol == A_LOCAL) &&
-		    (account->recv_at_getall)) {
+		    should_check(account, autocheck)) {
 			account_new_msgs = inc_spool_account(account);
 			if (account_new_msgs > 0)
 				new_msgs += account_new_msgs;

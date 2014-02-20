@@ -146,6 +146,7 @@ typedef struct ReceivePage
 	GtkWidget *filter_on_recv_checkbtn;
 	GtkWidget *filterhook_on_recv_checkbtn;
 	GtkWidget *recvatgetall_checkbtn;
+	GtkWidget *recvatautochk_checkbtn;
 	
 	GtkWidget *imap_frame;
 	GtkWidget *imap_auth_type_optmenu;
@@ -479,6 +480,10 @@ static PrefParam receive_param[] = {
 
 	{"receive_at_get_all", "TRUE", &tmp_ac_prefs.recv_at_getall, P_BOOL,
 	 &receive_page.recvatgetall_checkbtn,
+	 prefs_set_data_from_toggle, prefs_set_toggle},
+
+	{"recv_at_autochk", "TRUE", &tmp_ac_prefs.recv_at_autochk, P_BOOL,
+	 &receive_page.recvatautochk_checkbtn,
 	 prefs_set_data_from_toggle, prefs_set_toggle},
 
 	{"max_news_articles", "300", &tmp_ac_prefs.max_articles, P_INT,
@@ -1386,6 +1391,7 @@ static void receive_create_widget_func(PrefsPage * _page,
 	GtkListStore *menu;
 	GtkTreeIter iter;
 	GtkWidget *recvatgetall_checkbtn;
+	GtkWidget *recvatautochk_checkbtn;
 
 	GtkWidget *hbox2;
 	GtkWidget *frame2;
@@ -1611,6 +1617,10 @@ static void receive_create_widget_func(PrefsPage * _page,
 		(vbox1, recvatgetall_checkbtn,
 		 _("'Get Mail' checks for new messages on this account"));
 
+	PACK_CHECK_BUTTON
+		(vbox1, recvatautochk_checkbtn,
+		 _("Include this account in automatic email check"));
+
 	page->pop3_frame               = frame1;
 	page->use_apop_checkbtn          = use_apop_checkbtn;
 	page->rmmail_checkbtn            = rmmail_checkbtn;
@@ -1637,6 +1647,7 @@ static void receive_create_widget_func(PrefsPage * _page,
 	page->local_inbox_btn		= local_inbox_btn;
 
 	page->recvatgetall_checkbtn      = recvatgetall_checkbtn;
+	page->recvatautochk_checkbtn     = recvatautochk_checkbtn;
 
 	page->frame_maxarticle	= frame2;
 	page->maxarticle_spinbtn     	= maxarticle_spinbtn;
@@ -4154,6 +4165,7 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 		prefs_account_filter_on_recv_toggled
 			(GTK_TOGGLE_BUTTON(receive_page.filter_on_recv_checkbtn), NULL);
 		gtk_widget_set_sensitive(receive_page.recvatgetall_checkbtn, TRUE);
+		gtk_widget_set_sensitive(receive_page.recvatautochk_checkbtn, TRUE);
 		/* update pop_before_smtp sensitivity */
 		gtk_toggle_button_set_active
 			(GTK_TOGGLE_BUTTON(send_page.pop_bfr_smtp_checkbtn), FALSE);
@@ -4169,6 +4181,9 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 				TRUE);
 			gtk_toggle_button_set_active
 				(GTK_TOGGLE_BUTTON(receive_page.recvatgetall_checkbtn),
+				 FALSE);
+			gtk_toggle_button_set_active
+				(GTK_TOGGLE_BUTTON(receive_page.recvatautochk_checkbtn),
 				 FALSE);
 		}
 
@@ -4249,6 +4264,7 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 		prefs_account_filter_on_recv_toggled
 			(GTK_TOGGLE_BUTTON(receive_page.filter_on_recv_checkbtn), NULL);
 		gtk_widget_set_sensitive(receive_page.recvatgetall_checkbtn, TRUE);
+		gtk_widget_set_sensitive(receive_page.recvatautochk_checkbtn, TRUE);
 		prefs_account_mailcmd_toggled
 			(GTK_TOGGLE_BUTTON(basic_page.mailcmd_checkbtn), NULL);
 
@@ -4267,6 +4283,9 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 				TRUE);
 			gtk_toggle_button_set_active
 				(GTK_TOGGLE_BUTTON(receive_page.recvatgetall_checkbtn),
+				 TRUE);
+			gtk_toggle_button_set_active
+				(GTK_TOGGLE_BUTTON(receive_page.recvatautochk_checkbtn),
 				 TRUE);
 		}
 
@@ -4356,6 +4375,7 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 		prefs_account_filter_on_recv_toggled
 			(GTK_TOGGLE_BUTTON(receive_page.filter_on_recv_checkbtn), NULL);
 		gtk_widget_set_sensitive(receive_page.recvatgetall_checkbtn, TRUE);
+		gtk_widget_set_sensitive(receive_page.recvatautochk_checkbtn, TRUE);
 		gtk_widget_set_sensitive(basic_page.smtpserv_entry, TRUE);
 		gtk_widget_set_sensitive(basic_page.smtpserv_label, TRUE);
 
@@ -4374,6 +4394,9 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 				TRUE);
 			gtk_toggle_button_set_active
 				(GTK_TOGGLE_BUTTON(receive_page.recvatgetall_checkbtn),
+				 FALSE);
+			gtk_toggle_button_set_active
+				(GTK_TOGGLE_BUTTON(receive_page.recvatautochk_checkbtn),
 				 FALSE);
 		}
 
@@ -4458,6 +4481,7 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 		prefs_account_filter_on_recv_toggled
 			(GTK_TOGGLE_BUTTON(receive_page.filter_on_recv_checkbtn), NULL);
 		gtk_widget_set_sensitive(receive_page.recvatgetall_checkbtn, FALSE);
+		gtk_widget_set_sensitive(receive_page.recvatautochk_checkbtn, FALSE);
 
 		gtk_widget_set_sensitive(basic_page.smtpserv_entry, TRUE);
 		gtk_widget_set_sensitive(basic_page.smtpserv_label, TRUE);
@@ -4472,6 +4496,8 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 			(GTK_TOGGLE_BUTTON(receive_page.filterhook_on_recv_checkbtn), FALSE);
 		gtk_toggle_button_set_active
 			(GTK_TOGGLE_BUTTON(receive_page.recvatgetall_checkbtn), FALSE);
+		gtk_toggle_button_set_active
+			(GTK_TOGGLE_BUTTON(receive_page.recvatautochk_checkbtn), FALSE);
 
 #ifdef USE_GNUTLS
 		gtk_widget_hide(ssl_page.pop_frame);
@@ -4555,6 +4581,7 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 		prefs_account_filter_on_recv_toggled
 			(GTK_TOGGLE_BUTTON(receive_page.filter_on_recv_checkbtn), NULL);
 		gtk_widget_set_sensitive(receive_page.recvatgetall_checkbtn, TRUE);
+		gtk_widget_set_sensitive(receive_page.recvatautochk_checkbtn, TRUE);
 
 		gtk_widget_set_sensitive(basic_page.smtpserv_entry, TRUE);
 		gtk_widget_set_sensitive(basic_page.smtpserv_label, TRUE);
@@ -4572,6 +4599,9 @@ static void prefs_account_protocol_changed(GtkComboBox *combobox, gpointer data)
 				TRUE);
 			gtk_toggle_button_set_active
 				(GTK_TOGGLE_BUTTON(receive_page.recvatgetall_checkbtn),
+				 TRUE);
+			gtk_toggle_button_set_active
+				(GTK_TOGGLE_BUTTON(receive_page.recvatautochk_checkbtn),
 				 TRUE);
 		}
 
