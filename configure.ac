@@ -898,14 +898,14 @@ if test x"$enable_libetpan" = xyes; then
 	  AC_CHECK_HEADER(libetpan/libetpan.h, [libetpan_result=yes])
 	  if test "x$libetpan_result" = "xyes"; then
 	    AC_MSG_CHECKING([whether libetpan-config hints compiles and links fine])
-	    LIBS="$LIBS `$libetpanconfig --libs 2>/dev/null`"
+	    LIBS="$LIBS `$libetpanconfig --libs 2>/dev/null | sed -e 's@-specs=/usr/lib/rpm/redhat/redhat-hardened-ld @@'`"
 	    AC_TRY_LINK([#include <libetpan/dbstorage.h>], [db_mailstorage_init(NULL, NULL);], [libetpan_result=yes], [libetpan_result=no])
 	    AC_MSG_RESULT([$libetpan_result])
 	  fi
 	fi
 	if test "x$libetpan_result" = "xyes"; then
 	   LIBETPAN_CPPFLAGS="`$libetpanconfig --cflags`"
-	   LIBETPAN_LIBS="`$libetpanconfig --libs`"
+	   LIBETPAN_LIBS="`$libetpanconfig --libs | sed -e 's@-specs=/usr/lib/rpm/redhat/redhat-hardened-ld @@'`"
 	   LIBETPAN_VERSION=`$libetpanconfig --version | $AWK -F. '{printf "%d", ($1 * 100) + $2}'`
 	   if test "$LIBETPAN_VERSION" -lt "57"; then
 		AC_MSG_RESULT([*** Claws Mail requires libetpan 0.57 or newer. See http://www.etpan.org/])
